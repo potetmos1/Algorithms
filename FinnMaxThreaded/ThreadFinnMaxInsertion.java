@@ -6,12 +6,12 @@ import java.util.concurrent.locks.*;
 
 public class ThreadFinnMaxInsertion {
     
-    public static int[] finnMax(int[] arr, int n){
-        int maxes[] = new int[n];
+    public static int[] finnMax(int[] arr, int k, int n){
+        int maxes[] = new int[k];
         int min;
 
         //places n first numbers into array
-            maxes = Arrays.copyOfRange(arr, 0, n);
+            maxes = Arrays.copyOfRange(arr, 0, k);
 
         //reverse insertion sort maxes
         for(int i=1; i<maxes.length; i++){
@@ -57,14 +57,28 @@ public class ThreadFinnMaxInsertion {
 
     public static void main(String[] args) {
         int cores = Runtime.getRuntime().availableProcessors();
-        System.out.println("Available cores: " + cores);
-        int[] arr = new int[Integer.parseInt(args[1])];
+        int n = Integer.parseInt(args[0]);
+        int k = Integer.parseInt(args[1]);
+        int[] arr = new int[n];
         Random r = new Random();
+        long[] times = new long[7];
+        
+        System.out.println("Available cores: " + cores);
 
-        for(int i=0; i<arr.length; i++){
-            arr[i] = r.nextInt(Integer.parseInt(args[1]));
+        for(int i=0; i<7; i++){
+            for(int l=0; l<arr.length; l++){
+                arr[l] = r.nextInt(n);
+            }
+            long t0 = System.nanoTime();
+            int[] maxes = finnMax(arr, k, n);
+            long t1 = System.nanoTime();
+            long runtime = t1-t0;
+            times[i] = runtime;
+            System.out.println(Arrays.toString(maxes));
         }
-        int[] maxes = finnMax(arr, Integer.parseInt(args[0]));
-        System.out.println(Arrays.toString(maxes));
+        
+        Arrays.sort(times);
+        System.out.println(Arrays.toString(times));
+        System.out.println("Median: " + times[3]);
     }
 }
