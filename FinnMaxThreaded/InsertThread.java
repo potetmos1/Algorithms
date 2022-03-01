@@ -1,28 +1,49 @@
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.locks.ReentrantLock;
-
+import java.util.Arrays;
 public class InsertThread implements Runnable{
-    CountDownLatch latch;
-    FinnMaxMonitor monitor;
-    public volatile int[] maxes;
-    public int[] arr;
-    public int min;
+    private int[] arr;
+    private int[][] threadArrays;
+    private int k, num;
 
-    public InsertThread(CountDownLatch latch, FinnMaxMonitor monitor, 
-                        int[] maxes, int[] arr){
-        this.latch = latch;
-        this.monitor = monitor;
-        this.maxes = maxes;
+    public InsertThread(int[] arr, int[][]threadArrays, int k, int num){
         this.arr = arr;
-        this.min = maxes[maxes.length-1];
+        this.k = k;
+        this.threadArrays = threadArrays;
+        this.num = num;
     }
-
+    
     public void run(){
-        for(int i=0; i<arr.length; i++){
-            if(arr[i] > min){
-                maxes = monitor.insert(min, maxes);
+        //for the first elements
+        for(int i=1; i<k; i++){
+            int key = i;
+            int j = i-1;
+
+            while(j >= 0 && arr[key] > arr[j]){
+                insert(arr, key, j);
+                key--;
+                --j;
             }
-            latch.countDown();
         }
-    }  
+        
+        //sorting array
+        for(int i=k -1; i<arr.length; i++){
+            if(arr[i] > arr[k-1]){
+                insert(arr, i, k-1);
+                int pos1 = k -1;
+                int pos2 = pos1-1;
+                while(pos2 >= 0 && arr[pos1] > arr[pos2]){
+                    insert(arr, pos1, pos2);
+                    pos1--;
+                    pos2--;
+                }
+            }
+        }
+        threadArrays[num] = Arrays.copyOfRange(arr, 0, k-1);
+    }
+    
+
+    private static void insert(int[] arr, int pos1, int pos2){
+        int tmp = arr[pos1];
+        arr[pos1] = arr[pos2];
+        arr[pos2] = tmp;
+    }
 }
